@@ -1,0 +1,3 @@
+{
+    "python.defaultInterpreterPath": "./lane-detection/bin/python"
+}
