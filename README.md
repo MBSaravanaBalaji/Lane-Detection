@@ -1,4 +1,4 @@
-
+![Lane Overlay on Test Frame](sample test image.png)
 
 # Lane Detection Project
 
@@ -8,7 +8,7 @@ This project implements a robust lane detection pipeline using OpenCV and Python
 
 ## Sample Output
 
-![Lane Overlay on Test Frame](sample test image.png)
+
 
 ![Original Test Image](test_image.jpg)
 
