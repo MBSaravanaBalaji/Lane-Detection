@@ -82,27 +82,66 @@ def region_of_interest(image):
 # cv2.imshow('result', combined_image)
 # cv2.waitKey(0)
 
-
 cap = cv2.VideoCapture('test2.mp4')
+
+# store last‐seen lines
+prev_left_line = None
+prev_right_line = None
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
 
-    canny_image = canny(frame)
+    canny_image   = canny(frame)
     cropped_image = region_of_interest(canny_image)
+    #fatten the edges so hough sees them better
+    kernel = np.ones((3,3), np.uint8)
+    canny_image = cv2.dilate(canny_image, kernel, iterations=1)
+
     lines = cv2.HoughLinesP(
-        cropped_image, 2, np.pi/180, 100, np.array([]),
-        minLineLength=40, maxLineGap=5
-    )
+    cropped_image,
+    rho=1,
+    theta=np.pi/180,
+    threshold=50,          # half as many votes required
+    lines=np.array([]),
+    minLineLength=20,      # allow shorter segments
+    maxLineGap=30          # bridge bigger gaps
+)
 
     if lines is not None:
-        averaged_lines = averaged_slope_intercept(frame, lines)
-        line_image = display_lines(frame, averaged_lines)
+        # get 0–2 averaged lines
+        avgs = averaged_slope_intercept(frame, lines)
+
+        # separate out left vs right by slope
+        current_left, current_right = None, None
+        for x1, y1, x2, y2 in avgs:
+            slope = (y2 - y1) / (x2 - x1)
+            if slope < 0:
+                current_left = (x1, y1, x2, y2)
+            else:
+                current_right = (x1, y1, x2, y2)
+
+        # if one side went missing, reuse last frame’s
+        if current_left  is None: current_left  = prev_left_line
+        if current_right is None: current_right = prev_right_line
+
+        # update memory
+        prev_left_line, prev_right_line = current_left, current_right
+
+        # draw both
+        line_image = np.zeros_like(frame)
+        if current_left is not None:
+            x1, y1, x2, y2 = current_left
+            cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
+        if current_right is not None:
+            x1, y1, x2, y2 = current_right
+            cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
+
         combined_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
         cv2.imshow('result', combined_image)
     else:
-        # no lines detected → just show the raw frame
+        # no raw Hough lines at all → show frame
         cv2.imshow('result', frame)
 
     if cv2.waitKey(1) == ord('q'):
