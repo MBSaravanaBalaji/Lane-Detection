@@ -1,5 +1,4 @@
-![Lane Overlay on Test Frame](sample test image.png)
-
+![Original Test Image](test_image.jpg)
 # Lane Detection Project
 
 This project implements a robust lane detection pipeline using OpenCV and Python. It processes video frames to identify and overlay lane lines on road images, making it ideal for self-driving car demonstrations and computer vision learning.
@@ -7,10 +6,10 @@ This project implements a robust lane detection pipeline using OpenCV and Python
 ---
 
 ## Sample Output
+![Lane Overlay on Test Frame](sample_test_image.png)
 
 
 
-![Original Test Image](test_image.jpg)
 
 ---
 
